@@ -36,7 +36,7 @@ class ImageNetDataset(CommonDataset):
                  transform_ops=None,
                  delimiter=None,
                  relabel=False):
-        self.delimiter = delimiter if delimiter is not None else " "
+        self.delimiter = delimiter if delimiter is not None else "\t"
         self.relabel = relabel
         super(ImageNetDataset, self).__init__(image_root, cls_label_path,
                                               transform_ops)

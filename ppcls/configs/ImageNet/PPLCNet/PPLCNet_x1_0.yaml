@@ -1,22 +1,25 @@
 # global configs
 Global:
-  checkpoints: null
-  pretrained_model: null
+  checkpoints: output/PPLCNet_x1_0/best_model
+  pretrained_model: output/PPLCNet_x1_0/best_model
   output_dir: ./output/
   device: gpu
-  save_interval: 1
+  save_interval: 5
   eval_during_train: True
   eval_interval: 1
-  epochs: 360
-  print_batch_step: 10
+  epochs: 200
+  print_batch_step: 100
   use_visualdl: False
   # used for static mode and model export
   image_shape: [3, 224, 224]
-  save_inference_dir: ./inference
+  save_inference_dir: output/PPLCNet_x1_0/inference
 # model architecture
 Arch:
   name: PPLCNet_x1_0
-  class_num: 1000
+  pretrained: False
+  use_ssld: True
+  use_sync_bn: True
+  class_num: 20
  
 # loss function config for traing/eval process
 Loss:
@@ -34,7 +37,7 @@ Optimizer:
   momentum: 0.9
   lr:
     name: Cosine
-    learning_rate: 0.8
+    learning_rate: 0.003
     warmup_epoch: 5
   regularizer:
     name: 'L2'
@@ -46,8 +49,8 @@ DataLoader:
   Train:
     dataset:
       name: ImageNetDataset
-      image_root: ./dataset/ILSVRC2012/
-      cls_label_path: ./dataset/ILSVRC2012/train_list.txt
+      image_root: /mnt/ssd/martin/project/ocr_game/data/det/
+      cls_label_path: /mnt/ssd/martin/project/ocr_game/data/det/train_cls.txt
       transform_ops:
         - DecodeImage:
             to_rgb: True
@@ -56,15 +59,28 @@ DataLoader:
             size: 224
         - RandFlipImage:
             flip_code: 1
+        - TimmAutoAugment:
+            prob: 0.0
+            config_str: rand-m9-mstd0.5-inc1
+            interpolation: bicubic
+            img_size: 192
         - NormalizeImage:
             scale: 1.0/255.0
             mean: [0.485, 0.456, 0.406]
             std: [0.229, 0.224, 0.225]
             order: ''
+        - RandomErasing:
+            EPSILON: 0.1
+            sl: 0.02
+            sh: 1.0/3.0
+            r1: 0.3
+            attempt: 10
+            use_log_aspect: True
+            mode: pixel
 
     sampler:
       name: DistributedBatchSampler
-      batch_size: 512
+      batch_size: 64
       drop_last: False
       shuffle: True
     loader:
@@ -74,8 +90,8 @@ DataLoader:
   Eval:
     dataset: 
       name: ImageNetDataset
-      image_root: ./dataset/ILSVRC2012/
-      cls_label_path: ./dataset/ILSVRC2012/val_list.txt
+      image_root: /mnt/ssd/martin/project/ocr_game/data/det/
+      cls_label_path: /mnt/ssd/martin/project/ocr_game/data/det/val_cls.txt
       transform_ops:
         - DecodeImage:
             to_rgb: True
@@ -99,7 +115,7 @@ DataLoader:
       use_shared_memory: True
 
 Infer:
-  infer_imgs: docs/images/inference_deployment/whl_demo.jpg
+  infer_imgs: /mnt/ssd/martin/project/ocr_game/data/det/val/lol
   batch_size: 10
   transforms:
     - DecodeImage:
@@ -117,8 +133,8 @@ Infer:
     - ToCHWImage:
   PostProcess:
     name: Topk
-    topk: 5
-    class_id_map_file: ppcls/utils/imagenet1k_label_list.txt
+    topk: 1
+    class_id_map_file: /mnt/ssd/martin/project/ocr_game/data/det/cls.txt
 
 Metric:
   Train:

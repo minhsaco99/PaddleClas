@@ -27,5 +27,6 @@ if __name__ == "__main__":
     args = config.parse_args()
     config = config.get_config(
         args.config, overrides=args.override, show=False)
+    print(config)
     engine = Engine(config, mode="infer")
     engine.infer()

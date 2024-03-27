@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from ppcls.data.preprocess.ops.autoaugment import ImageNetPolicy as RawImageNetPolicy
-from ppcls.data.preprocess.ops.randaugment import RandAugment as RawRandAugment
+from ppcls.data.preprocess.ops.randaugment import RandAugment as RawRandAugment, CustomCLSAug
 from ppcls.data.preprocess.ops.timm_autoaugment import RawTimmAutoAugment
 from ppcls.data.preprocess.ops.cutout import Cutout
 
